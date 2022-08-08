@@ -11,9 +11,14 @@ module crossbar_tb;
     parameter int                           TDATA_WIDTH = 32;
     parameter int                           TADDR_WIDTH = 32;
     parameter int                           PKT_QTY = 1000;
-    parameter int                           S_CH_WIDTH = $clog2(S_QTY);
-    parameter int                           M_CH_WIDTH = $clog2(S_QTY);
 
+    // Contants
+    localparam int                          S_CH_WIDTH = $clog2(S_QTY);
+    localparam int                          M_CH_WIDTH = $clog2(S_QTY);
+    localparam int                          CMD_READ_OP = 0;
+    localparam int                          CMD_WRITE_OP = 1;
+
+    // Types
     typedef struct packed {
         logic [M_CH_WIDTH-1:0]  m_ch;
         logic                   cmd;
@@ -21,12 +26,14 @@ module crossbar_tb;
         logic [TDATA_WIDTH-1:0] data;
     } req_message_t;
 
+    // Globals
     logic [$bits(req_message_t)-1:0]        req_queue[S_QTY][$];
     logic [TDATA_WIDTH-1:0]                 resp_queue[M_QTY][$];
 
     event                                   e_data_sent[M_QTY];
     event                                   e_test_completed;
 
+    // Interfaces
     interface req_ack_m_intf(input logic aclk, input logic aresetn);
         // signals
         logic                       req;
@@ -230,7 +237,7 @@ module crossbar_tb;
             m_intf.send_req(msg.cmd, msg.addr, msg.data);
             scoreboard.register_master_req(s_ch, msg);
 
-            if (msg.cmd == 1) begin
+            if (msg.cmd == CMD_READ_OP) begin
                 scoreboard.register_slave_resp(m_m_ch, msg.data);
             end
         endtask
@@ -292,7 +299,7 @@ module crossbar_tb;
 
             scoreboard.check_master_req(m_s_ch, hw_msg);
 
-            if (hw_cmd == 1'b1) begin
+            if (hw_cmd == CMD_READ_OP) begin
                 m_sem.get(1);
                 m_rdata_queue.push_back(hw_wdata);
                 m_sem.put(1);
@@ -542,7 +549,7 @@ module crossbar_tb;
 
         $display("Test completed");
         $display("Errors : %0d", scoreboard.m_errcnt);
-        //$stop;
+        $finish(0);;
     end
 
 

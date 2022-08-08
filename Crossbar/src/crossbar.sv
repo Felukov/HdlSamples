@@ -199,7 +199,7 @@ module crossbar #(
             ) crossbar_fifo_inst (
                 .clk                (clk),
                 .resetn             (resetn),
-                .s_axis_data_tvalid (slave_ack[s_id] & slave_cmd[s_id]),
+                .s_axis_data_tvalid (slave_ack[s_id] & ~slave_cmd[s_id]),
                 .s_axis_data_tready (),
                 .s_axis_data_tdata  ({slave_s_tag[s_id], slave_s_m_id[s_id]}),
                 .m_axis_data_tvalid (),
@@ -219,7 +219,7 @@ module crossbar #(
                 .clk                (clk),
                 .resetn             (resetn),
                 .m_axis_tag_tvalid  (master_tag_tvalid[m_id]),
-                .m_axis_tag_tready  (master_ack[m_id] & master_cmd[m_id]),
+                .m_axis_tag_tready  (master_ack[m_id] & ~master_cmd[m_id]),
                 .m_axis_tag_tdata   (master_tag_tdata[m_id]),
                 .s_axis_data_tvalid (s2m_resp[m_id]),
                 .s_axis_data_tdata  (slave_rdata),
